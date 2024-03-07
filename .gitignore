@@ -1,1 +1,29 @@
-node_modules
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Diagnostic reports (https://nodejs.org/api/report.html)
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# Dependency directories
+node_modules/
+
+# Environments - dotenv environment variable files & Docker
+.env
+.env.development.local
+.env.test.local
+.env.production.local
+.env.local
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+venv_name/
+
+# Makefile log
+make.log
+
+# file to big for github
