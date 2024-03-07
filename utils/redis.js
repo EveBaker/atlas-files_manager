@@ -21,7 +21,27 @@ const redis = require("redis");
 
 class RedisClient {
   constructor() {
-    this.client = CreateClient();
+    this.client = redis.CreateClient();
+
+    this.client.on("error", (err) => console.error(err));
+
+    this.client.connect();
+
+    function isAlive() {
+      
+  }
+
+    async function get(key, callback) {
+
+    }
+
+    async function set(key, value, callback) {
+
+    }
+
+    async function del(key, value) {
+
+    }
   }
 }
 

@@ -4,3 +4,4 @@ class DBClient{
         this.port
     }
 }
+this.client
