@@ -25,7 +25,7 @@ class RedisClient {
     this.client = redis.createClient();
 
     // Display any errors in the console
-    this.client.on("error", (err) => {
+    this.client.on('error', (err) => {
       console.error(`Redis client error: ${err}`);
     });
 
@@ -38,9 +38,8 @@ class RedisClient {
     // Check if the client is defined and connected
     if (this.client && this.client.connected) {
       return true;
-    } else {
-      return false;
     }
+    return false;
   }
 
   async get(key) {
