@@ -6,6 +6,12 @@ echo 'export PS1="\[\e[92m\]\u@\h:\[\e[36m\]\w\[\e[00m\]\$ "' >> ~/.bashrc
 # Apply changes without needing to re-login
 source ~/.bashrc
 
+# Start Redis server
+redis-server &
+
+# Start MongoDB server
+mongod --fork --logpath /var/log/mongodb.log
+
 # Check if the command argument is provided
 if [ -z "$1" ]; then
     # If no command is provided, use `tail -f /dev/null` to keep the container running

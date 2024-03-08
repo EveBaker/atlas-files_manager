@@ -17,33 +17,55 @@
     After the class definition, create and export an instance
     of RedisClient called redisClient.
 */
-const redis = require("redis");
+const redis = require('redis');
 
 class RedisClient {
   constructor() {
-    this.client = redis.CreateClient();
+    // Create a Redis client
+    this.client = redis.createClient();
 
-    this.client.on("error", (err) => console.error(err));
+    // Error handling
+    this.client.on('error', (err) => console.error('Connection to Redis server failed. Make sure the Redis server is running.', err));
 
-    this.client.connect();
-
-    function isAlive() {
-      
+    // Connect to Redis
+    this.client.on('connect', () => console.log('Connected to Redis Server'));
   }
 
-    async function get(key, callback) {
+  // return when connection to Redis is a success
+  isAlive() {
+    return this.client.connected;
+  }
 
+  // returns the Redis value stored for this key
+  async get(key) {
+    try {
+      const value = await this.client.get(key);
+      return value;
+    } catch (error) {
+      console.error('Error getting value from Redis:', error);
+      return null;
     }
+  }
 
-    async function set(key, value, callback) {
-
+  // Set a key-value pair with an expiration
+  async set(key, value, duration) {
+    try {
+      await this.client.set(key, value, 'EX', duration);
+    } catch (error) {
+      console.error('Error setting value in Redis:', error);
     }
+  }
 
-    async function del(key, value) {
-
+  // Delete a key
+  async del(key) {
+    try {
+      await this.client.del(key);
+    } catch (error) {
+      console.error('Error deleting value from Redis:', error);
     }
   }
 }
 
-const redisClient = RedisClient();
+// Export an instance
+const redisClient = new RedisClient();
 module.exports = redisClient;
