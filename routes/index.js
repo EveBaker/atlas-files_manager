@@ -16,4 +16,7 @@ router.get('/stats', AppController.getStats);
 
 router.post('/users', UsersController.postNew);
 
+router.get('/files', FilesController.getShow);
+router.get('files', FilesController.getIndex)
+
 module.exports = router;
