@@ -10,44 +10,37 @@
  * users collection must be used for counting all users
  * files collection must be used for counting all files
  */
-// Import the necessary dependencies
-const redisClient = require('../utils/redis');
-const DBClient = require('../utils/db');
+import redisClient from '../utils/redis';
 
-// Define the controller object
+import DBClient from '../utils/db';
+
 const AppController = {
-  // Endpoint to check the status of Redis and DB
-  getStatus: async (req, res) => {
-    try {
-      // Check if Redis and DB are alive
-      const redisAlive = redisClient.isAlive();
-      const dbAlive = await DBClient.isAlive();
+  getStatus: (request, response) => {
+    const redisAlive = redisClient.isAlive();
+    const dbAlive = DBClient.isAlive();
 
-      // Respond with status and appropriate status code
-      res.status(200).json({ redis: redisAlive, db: dbAlive });
-    } catch (error) {
-      // If there's an error, respond with 500 Internal Server Error
-      console.error('Error checking status:', error);
-      res.status(500).json({ error: 'Internal Server Error' });
+    if (redisAlive && dbAlive) {
+      response.status(200).json({ redis: true, db: true });
+    } else {
+      response.status(500).json({ error: 'Service Not Available' });
     }
   },
 
-  // Endpoint to get the number of users and files
-  getStats: async (req, res) => {
+  getStats: async (request, response) => {
     try {
-      // Use the user and file counting functions from the DB client
+      // Use async/await to fetch user and file counts
+      // functions from utils/db
       const userCount = await DBClient.nbUsers();
       const fileCount = await DBClient.nbFiles();
 
-      // Respond with the counts and appropriate status code
-      res.status(200).json({ users: userCount, files: fileCount });
+      // Return the counts in the response
+      response.status(200).json({ users: userCount, files: fileCount });
     } catch (error) {
-      // If there's an error, respond with 500 Internal Server Error
-      console.error('Error getting stats:', error);
-      res.status(500).json({ error: 'Internal Server Error' });
+      // Handle any errors that occur during the counting process
+      console.error('Error fetching user and file counts:', error);
+      response.status(500).json({ error: 'Internal Server Error' });
     }
   },
 };
 
-// Export the controller object
 module.exports = AppController;
