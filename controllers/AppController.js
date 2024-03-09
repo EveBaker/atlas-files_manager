@@ -10,28 +10,44 @@
  * users collection must be used for counting all users
  * files collection must be used for counting all files
  */
-import redisClient from '../utils/redis';
+// Import the necessary dependencies
+const redisClient = require('../utils/redis');
+const DBClient = require('../utils/db');
 
-import DBClient from '../utils/db';
-
+// Define the controller object
 const AppController = {
-  getStatus: (request, response) => {
-    const redisAlive = redisClient.isAlive();
-    const dbAlive = DBClient.isAlive();
+  // Endpoint to check the status of Redis and DB
+  getStatus: async (req, res) => {
+    try {
+      // Check if Redis and DB are alive
+      const redisAlive = redisClient.isAlive();
+      const dbAlive = await DBClient.isAlive();
 
-    if (redisAlive && dbAlive) {
-      response.status(200).json({ redis: true, db: true });
-    } else {
-      response.status(500).json({ error: 'Service Not Available' });
+      // Respond with status and appropriate status code
+      res.status(200).json({ redis: redisAlive, db: dbAlive });
+    } catch (error) {
+      // If there's an error, respond with 500 Internal Server Error
+      console.error('Error checking status:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
     }
   },
 
-  getStats: (request, response) => {
-    const userCount = DBClient.nbUsers();
-    const fileCount = DBClient.nbFiles();
+  // Endpoint to get the number of users and files
+  getStats: async (req, res) => {
+    try {
+      // Use the user and file counting functions from the DB client
+      const userCount = await DBClient.nbUsers();
+      const fileCount = await DBClient.nbFiles();
 
-    response.status(200).json({ users: userCount, files: fileCount });
+      // Respond with the counts and appropriate status code
+      res.status(200).json({ users: userCount, files: fileCount });
+    } catch (error) {
+      // If there's an error, respond with 500 Internal Server Error
+      console.error('Error getting stats:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
   },
 };
 
+// Export the controller object
 module.exports = AppController;

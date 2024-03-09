@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Set a colorful PS1 prompt directly in your Dockerfile or startup script
-echo 'export PS1="\[\e[92m\]\u@\h:\[\e[36m\]\w\[\e[00m\]\$ "' >> ~/.bashrc
+echo 'PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\[\033[0;32m\]\u\[\033[00m\]@\[\033[0;36m\]docker-container\[\033[00m\]: \[\033[0;33m\]\w\[\033[00m\]\$ "' >> ~/.bashrc
 
 # Apply changes without needing to re-login
 source ~/.bashrc

@@ -51,7 +51,7 @@ COPY . /atlas-files_manager
 RUN npm install
 
 # Expose ports (if needed)
-EXPOSE 3000 4000 6379
+EXPOSE 3000 4000 6379 5000
 
 # Make the start script executable
 COPY start.sh /start.sh
