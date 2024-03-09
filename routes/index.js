@@ -12,7 +12,6 @@ const router = express.Router();
 
 const UsersController = require('../controllers/UsersController');
 
-
 router.get('/status', AppController.getStatus);
 router.get('/stats', AppController.getStats);
 
