@@ -6,7 +6,7 @@ import redisClient from '../utils/redis';
 import dbClient from '../utils/db';
 
 class FilesController (req, res) {
-    static asyncPostUpload(req, res) {
+    static asyncpostUpload(req, res) {
         const id = await RedisClient.get('auth_$(req.headers['x-token']}');
         if (!id) return res.status(401).json({ error: 'Unauthorized' });
 
