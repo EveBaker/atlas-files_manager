@@ -26,11 +26,20 @@ const AppController = {
     }
   },
 
-  getStats: (request, response) => {
-    const userCount = DBClient.nbUsers();
-    const fileCount = DBClient.nbFiles();
+  getStats: async (request, response) => {
+    try {
+      // Use async/await to fetch user and file counts
+      // functions from utils/db
+      const userCount = await DBClient.nbUsers();
+      const fileCount = await DBClient.nbFiles();
 
-    response.status(200).json({ users: userCount, files: fileCount });
+      // Return the counts in the response
+      response.status(200).json({ users: userCount, files: fileCount });
+    } catch (error) {
+      // Handle any errors that occur during the counting process
+      console.error('Error fetching user and file counts:', error);
+      response.status(500).json({ error: 'Internal Server Error' });
+    }
   },
 };
 

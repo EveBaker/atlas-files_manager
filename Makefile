@@ -94,6 +94,7 @@ run: build
 	-p 3000:3000 \
 	-p 4000:4000 \
 	-p 6379:6379 \
+	-p 5000:5000 \
 	$(DOCKER_IMAGE_NAME)
 	@echo "`date +'%Y-%m-%d %H:%M:%S'` - Hurray!!! Your container is up and Running!" | tee -a make.log
 
