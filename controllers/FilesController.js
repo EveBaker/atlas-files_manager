@@ -10,10 +10,10 @@ class FilesController {
       if (!id) return res.status(401).json({ error: 'Unauthorized' });
 
       const {
-        name, 
-        type, 
-        parentId = '0', 
-        isPublic = false, 
+        name,
+        type,
+        parentId = '0',
+        isPublic = false,
         data,
       } = req.body;
 
@@ -35,7 +35,7 @@ class FilesController {
 
       let addedFile;
       const userId = new dbClient.ObjectID(id);
-      
+
       if (type === 'folder') {
         addedFile = await dbClient.db.collection('files').insertOne({
           userId,
@@ -106,9 +106,9 @@ class FilesController {
         .toArray();
     } else {
       fileList = await dbClient.files.aggregate([
-          { $match: { userId: new dbClient.ObjectID(userId) } },
-          { $skip: page * 20 },
-          { $limit: 20 },
+        { $match: { userId: new dbClient.ObjectID(userId) } },
+        { $skip: page * 20 },
+        { $limit: 20 },
         ])
         .toArray();
     }
