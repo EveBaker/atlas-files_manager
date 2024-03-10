@@ -22,7 +22,7 @@ class FilesController {
       const userId = new dbClient.ObjectID(id);
 
       if (parentId !== '0') {
-        const parentFile = await dbClient.files.findOne({
+        const parentFile = await dbClient.nbFiles.findOne({
           _id: new dbClient.ObjectID(parentId),
         });
         if (!parentFile) return res.status(400).json({ error: 'Parent not found' });
@@ -33,7 +33,7 @@ class FilesController {
 
       let addedFile;
       if (type === 'folder') {
-        addedFile = await dbClient.files.insertOne({
+        addedFile = await dbClient.nbFiles.insertOne({
           userId,
           name,
           type,
@@ -51,7 +51,7 @@ class FilesController {
 
         await fs.promises.writeFile(filePath, decode);
 
-        addedFile = await dbClient.files.insertOne({
+        addedFile = await dbClient.nbFiles.insertOne({
           userId,
           name,
           type,
@@ -93,7 +93,7 @@ class FilesController {
     const { parentId, page = 0 } = req.query;
     let fileList;
     if (parentId) {
-      fileList = await dbClient.files
+      fileList = await dbClient.nbFiles
         .aggregate([
           { $match: { parentId: new dbClient.ObjectID(parentId) } },
           { $skip: page * 20 },
@@ -125,7 +125,7 @@ class FilesController {
     const userId = await redisClient.get(`auth_${req.headers['x-token']}`);
 
     const { id } = req.params;
-    const file = await dbClient.files.findOne({
+    const file = await dbClient.nbFiles.findOne({
       _id: new dbClient.ObjectID(id),
     });
 
@@ -150,7 +150,7 @@ class FilesController {
     if (!userId) return res.status(401).json({ error: 'Unauthorized' });
 
     const { id } = req.params;
-    const file = await dbClient.files.findOne({
+    const file = await dbClient.nbFiles.findOne({
       _id: new dbClient.ObjectID(id),
     });
 
@@ -166,7 +166,7 @@ class FilesController {
 
     if (!userId) return res.status(401).json({ error: 'Unauthorized' });
     const { id } = req.params;
-    const file = await dbClient.files.findOne({
+    const file = await dbClient.nbFiles.findOne({
       _id: new dbClient.ObjectID(id),
     });
 
