@@ -25,7 +25,7 @@ class AuthController {
     const hashedPassword = sha1(password);
 
     try {
-      const user = await dbClient.users.findOne({ email, password: hashedPassword });
+      const user = await dbClient.db.collection('users').findOne({ email, password: hashedPassword });
       if (!user) {
         return res.status(401).json({ error: 'Unauthorized' });
       }
@@ -34,7 +34,7 @@ class AuthController {
       const key = `auth_${token}`;
       const expiration = 24 * 3600;
 
-      await redisClient.setex(key, expiration, user._id.toString());
+      await redisClient.set(key, expiration, user._id.toString());
 
       return res.status(200).json({ token });
     } catch (error) {
@@ -63,4 +63,4 @@ class AuthController {
   }
 }
 
-export default AuthController;
+module.exports = AuthController;
