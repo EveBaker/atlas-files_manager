@@ -17,7 +17,7 @@ import dbClient from '../utils/db';
 const AppController = {
   getStatus: (request, response) => {
     const redisAlive = redisClient.isAlive();
-    const dbAlive = DBClient.isAlive();
+    const dbAlive = dbClient.isAlive();
 
     if (redisAlive && dbAlive) {
       response.status(200).json({ redis: true, db: true });
@@ -30,8 +30,8 @@ const AppController = {
     try {
       // Use async/await to fetch user and file counts
       // functions from utils/db
-      const userCount = await DBClient.nbUsers();
-      const fileCount = await DBClient.nbFiles();
+      const userCount = await dbClient.nbUsers();
+      const fileCount = await dbClient.nbFiles();
 
       // Return the counts in the response
       response.status(200).json({ users: userCount, files: fileCount });
