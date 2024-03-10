@@ -6,7 +6,7 @@ import mon = from ('mongodb');
 
 class FilesController {
     static async postUpload(req, res) {
-        try {
+
             const id = await RedisClient.get(`auth_${req.headers['x-token']}`);
             if (!id) return res.status(401).json({ error: 'Unauthorized' });
 
@@ -170,7 +170,6 @@ class FilesController {
               return res.json({ ...file });
             }
           }
-    }
 
 
 export default FilesController;
