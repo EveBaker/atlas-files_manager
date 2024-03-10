@@ -109,7 +109,7 @@ class FilesController {
         { $match: { userId: new dbClient.ObjectID(userId) } },
         { $skip: page * 20 },
         { $limit: 20 },
-        ])
+      ])
         .toArray();
     }
     return res.json(
