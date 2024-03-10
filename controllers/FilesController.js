@@ -10,28 +10,28 @@ class FilesController {
       if (!id) return res.status(401).json({ error: 'Unauthorized' });
 
       const {
-        name, type, parentId = 0, isPublic = false, data,
+        name, type, parentId = '0', isPublic = false, data,
       } = req.body;
 
       if (!name) return res.status(400).json({ error: 'Missing name' });
       if (!type) return res.status(400).json({ error: 'Missing type' });
-      if (!data && type !== 'folder') {
+      if (type !== 'folder' && !data) {
         return res.status(400).json({ error: 'Missing data' });
       }
 
-      if (parentId) {
-        const file = await dbClient.files.findOne({
+      const userId = new dbClient.ObjectID(id);
+
+      if (parentId !== '0') {
+        const parentFile = await dbClient.files.findOne({
           _id: new dbClient.ObjectID(parentId),
         });
-        if (!file) return res.status(400).json({ error: 'Parent not found' });
-        if (file.type !== 'folder') {
+        if (!parentFile) return res.status(400).json({ error: 'Parent not found' });
+        if (parentFile.type !== 'folder') {
           return res.status(400).json({ error: 'Parent is not a folder' });
         }
       }
 
       let addedFile;
-      const userId = dbClient.ObjectId(id);
-
       if (type === 'folder') {
         addedFile = await dbClient.files.insertOne({
           userId,
@@ -57,7 +57,7 @@ class FilesController {
           type,
           isPublic,
           parentId,
-          filePath,
+          localPath: filePath, // Store the local path in the database
         });
       }
       return res.status(201).json({
@@ -69,7 +69,6 @@ class FilesController {
         parentId,
       });
     } catch (error) {
-      // Handle the error here
       console.error(error);
       return res.status(500).json({ error: 'Internal Server Error' });
     }
@@ -126,7 +125,9 @@ class FilesController {
     const userId = await redisClient.get(`auth_${req.headers['x-token']}`);
 
     const { id } = req.params;
-    const file = await dbClient.files.findOne({ _id: new dbClient.ObjectID(id) });
+    const file = await dbClient.files.findOne({
+      _id: new dbClient.ObjectID(id),
+    });
 
     if (!file || (!file.isPublic && (!userId || userId !== file.userId))) {
       return res.status(404).json({ error: 'Not found' });
@@ -149,7 +150,9 @@ class FilesController {
     if (!userId) return res.status(401).json({ error: 'Unauthorized' });
 
     const { id } = req.params;
-    const file = await dbClient.files.findOne({ _id: new dbClient.ObjectID(id) });
+    const file = await dbClient.files.findOne({
+      _id: new dbClient.ObjectID(id),
+    });
 
     if (!file || userId !== file.userId) {
       return res.status(404).json({ error: 'Not found' });
