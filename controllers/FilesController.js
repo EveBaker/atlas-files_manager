@@ -10,11 +10,7 @@ class FilesController {
       if (!id) return res.status(401).json({ error: 'Unauthorized' });
 
       const {
-        name,
-        type,
-        parentId = '0',
-        isPublic = false,
-        data,
+        name, type, parentId = '0', isPublic = false, data,
       } = req.body;
 
       if (!name) return res.status(400).json({ error: 'Missing name' });
@@ -80,9 +76,39 @@ class FilesController {
   static async getFile(req, res) {
     try {
       const userId = await redisClient.get(`auth_${req.headers['x-token']}`);
-      if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+      if (!userId) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
 
-      return res.status(200).json({ success: true });
+      const { id } = req.params; // Extract the file ID from the request parameters
+      if (!id) {
+        return res.status(400).json({ error: 'Missing file ID' });
+      }
+
+      // Attempt to retrieve the file from the database
+      const file = await dbClient.db.collection('files').findOne({
+        _id: new dbClient.ObjectID(id),
+      });
+
+      // Check if the file exists and if the user is authorized to access it
+      if (!file) {
+        return res.status(404).json({ error: 'File not found' });
+      }
+
+      // Check if the file is public or if the requestor is the owner
+      if (!file.isPublic && file.userId.toString() !== userId) {
+        return res.status(403).json({ error: 'Access denied' });
+      }
+
+      // Respond with the file details
+      return res.status(200).json({
+        id: file._id,
+        userId: file.userId,
+        name: file.name,
+        type: file.type,
+        isPublic: file.isPublic,
+        parentId: file.parentId,
+      });
     } catch (error) {
       console.error(error);
       return res.status(500).json({ error: 'Internal Server Error' });
@@ -96,7 +122,8 @@ class FilesController {
     const { parentId, page = 0 } = req.query;
     let fileList;
     if (parentId) {
-      fileList = await dbClient.db.collection('files')
+      fileList = await dbClient.db
+        .collection('files')
         .aggregate([
           { $match: { parentId: new dbClient.ObjectID(parentId) } },
           { $skip: page * 20 },
@@ -104,11 +131,12 @@ class FilesController {
         ])
         .toArray();
     } else {
-      fileList = await dbClient.files.aggregate([
-        { $match: { userId: new dbClient.ObjectID(userId) } },
-        { $skip: page * 20 },
-        { $limit: 20 },
-      ])
+      fileList = await dbClient.files
+        .aggregate([
+          { $match: { userId: new dbClient.ObjectID(userId) } },
+          { $skip: page * 20 },
+          { $limit: 20 },
+        ])
         .toArray();
     }
     return res.json(
@@ -152,7 +180,7 @@ class FilesController {
     if (!userId) return res.status(401).json({ error: 'Unauthorized' });
 
     const { id } = req.params;
-    const file = await dbClient.db.collection('files').findOne({
+    const file = await dbClient.db.collection('files').findOneAndUpdate({
       _id: new dbClient.ObjectID(id),
     });
 
@@ -168,7 +196,7 @@ class FilesController {
 
     if (!userId) return res.status(401).json({ error: 'Unauthorized' });
     const { id } = req.params;
-    const file = await dbClient.db.collection('files').findOne({
+    const file = await dbClient.db.collection('files').findOneAndUpdate({
       _id: new dbClient.ObjectID(id),
     });
 

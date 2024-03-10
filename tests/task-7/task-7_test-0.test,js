@@ -3,14 +3,14 @@ import chaiHttp from 'chai-http';
 
 import { v4 as uuidv4 } from 'uuid';
 
-import MongoClient from 'mongodb';
+import { MongoClient, ObjectID } from 'mongodb';
 import { promisify } from 'util';
 import redis from 'redis';
 import sha1 from 'sha1';
 
 chai.use(chaiHttp);
 
-describe('GET /disconnect', () => {
+describe('PUT /files/:id/publish', () => {
     let testClientDb;
     let testRedisClient;
     let redisDelAsync;
@@ -21,6 +21,8 @@ describe('GET /disconnect', () => {
     let initialUser = null;
     let initialUserId = null;
     let initialUserToken = null;
+
+    let initialFolderId = null;
 
     const fctRandomString = () => {
         return Math.random().toString(36).substring(2, 15);
@@ -43,6 +45,7 @@ describe('GET /disconnect', () => {
                 testClientDb = client.db(dbInfo.database);
             
                 await testClientDb.collection('users').deleteMany({})
+                await testClientDb.collection('files').deleteMany({})
 
                 // Add 1 user
                 initialUser = { 
@@ -52,6 +55,18 @@ describe('GET /disconnect', () => {
                 const createdDocs = await testClientDb.collection('users').insertOne(initialUser);
                 if (createdDocs && createdDocs.ops.length > 0) {
                     initialUserId = createdDocs.ops[0]._id.toString();
+                }
+
+                // Add 1 folder
+                const initialFolder = { 
+                    userId: ObjectID(initialUserId), 
+                    name: fctRandomString(), 
+                    type: "folder", 
+                    parentId: '0' 
+                };
+                const createdFileDocs = await testClientDb.collection('files').insertOne(initialFolder);
+                if (createdFileDocs && createdFileDocs.ops.length > 0) {
+                    initialFolderId = createdFileDocs.ops[0]._id.toString();
                 }
 
                 testRedisClient = redis.createClient();
@@ -75,26 +90,18 @@ describe('GET /disconnect', () => {
         fctRemoveAllRedisKeys();
     });
 
-    it('GET /disconnect with an incorrect token', (done) => {
-        redisKeysAsync('auth_*')
-        .then((keys) => {
-            chai.expect(keys.length).to.equal(1);
-        
-            chai.request('http://localhost:5000')
-                .get('/disconnect')
-                .set('X-Token', "nope")
-                .end(async (err, res) => {
-                    chai.expect(err).to.be.null;
-                    chai.expect(res).to.have.status(401);
+    it('PUT /files/:id/publish invalid token user', (done) => {
+        chai.request('http://localhost:5000')
+            .put(`/files/${initialFolderId}/publish`)
+            .set('X-Token', `${initialUserToken}_121`)
+            .end(async (err, res) => {
+                chai.expect(err).to.be.null;
+                chai.expect(res).to.have.status(401);
 
-                    const resError = res.body.error;
-                    chai.expect(resError).to.equal("Unauthorized");
-                
-                    const authKeys = await redisKeysAsync('auth_*');
-                    chai.expect(authKeys.length).to.equal(1);
+                const resError = res.body.error;
+                chai.expect(resError).to.equal("Unauthorized");
 
-                    done();
-                });
-        });
+                done();
+            });
     }).timeout(30000);
 });

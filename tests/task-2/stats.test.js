@@ -1,18 +1,18 @@
-import chai from "chai";
-import chaiHttp from "chai-http";
+import chai from 'chai';
+import chaiHttp from 'chai-http';
 
-import MongoClient from "mongodb";
+import MongoClient from 'mongodb';
 
 chai.use(chaiHttp);
 
-describe("GET /stats", () => {
+describe('gET /stats', () => {
   let testClientDb = null;
 
   beforeEach(() => {
     const dbInfo = {
-      host: process.env.DB_HOST || "localhost",
-      port: process.env.DB_PORT || "27017",
-      database: process.env.DB_DATABASE || "files_manager",
+      host: process.env.DB_HOST || 'localhost',
+      port: process.env.DB_PORT || '27017',
+      database: process.env.DB_DATABASE || 'files_manager',
     };
     return new Promise((resolve) => {
       MongoClient.connect(
@@ -20,20 +20,20 @@ describe("GET /stats", () => {
         async (err, client) => {
           testClientDb = client.db(dbInfo.database);
 
-          await testClientDb.collection("users").deleteMany({});
+          await testClientDb.collection('users').deleteMany({});
 
           resolve();
-        }
+        },
       );
     });
   });
 
   afterEach(() => {});
 
-  it("GET /stats exists", (done) => {
+  it('gET /stats exists', () => new Promise((done) => {
     chai
-      .request("http://localhost:5000")
-      .get("/stats")
+      .request('http://localhost:5000')
+      .get('/stats')
       .end((err, res) => {
         chai.expect(err).to.be.null;
         chai.expect(res).to.have.status(200);
@@ -42,5 +42,5 @@ describe("GET /stats", () => {
         chai.expect(bodyJson.files).to.equal(0);
         done();
       });
-  }).timeout(30000);
+  })).timeout(30000);
 });

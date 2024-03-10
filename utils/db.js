@@ -8,7 +8,7 @@ class DBClient {
     const database = process.env.DB_DATABASE || 'files_manager';
 
     // initializes MongoClient with Url
-    this.client = new MongoClient(`mongodb://${host}:${port}`, { useUnifiedTopology: true });
+    this.client = new MongoClient(`mongodb://${host}:${port}`, { useNewUrlParser: true, useUnifiedTopology: true });
     // set inital connection to null, changes if succsessful
     this.db = null;
 
