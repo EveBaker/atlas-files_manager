@@ -10,7 +10,11 @@ class FilesController {
       if (!id) return res.status(401).json({ error: 'Unauthorized' });
 
       const {
-        name, type, parentId = '0', isPublic = false, data,
+        name, 
+        type, 
+        parentId = '0', 
+        isPublic = false, 
+        data,
       } = req.body;
 
       if (!name) return res.status(400).json({ error: 'Missing name' });
@@ -19,10 +23,8 @@ class FilesController {
         return res.status(400).json({ error: 'Missing data' });
       }
 
-      const userId = new dbClient.ObjectID(id);
-
-      if (parentId !== '0') {
-        const parentFile = await dbClient.db.collection('files').findOne({
+      if (parentId) {
+        const parentFile = await dbClient.nbFiles.findOne({
           _id: new dbClient.ObjectID(parentId),
         });
         if (!parentFile) return res.status(400).json({ error: 'Parent not found' });
@@ -32,6 +34,8 @@ class FilesController {
       }
 
       let addedFile;
+      const userId = new dbClient.ObjectID(id);
+      
       if (type === 'folder') {
         addedFile = await dbClient.db.collection('files').insertOne({
           userId,
@@ -101,8 +105,7 @@ class FilesController {
         ])
         .toArray();
     } else {
-      fileList = await dbClient.files
-        .aggregate([
+      fileList = await dbClient.files.aggregate([
           { $match: { userId: new dbClient.ObjectID(userId) } },
           { $skip: page * 20 },
           { $limit: 20 },
