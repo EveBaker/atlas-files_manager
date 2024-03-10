@@ -26,8 +26,8 @@ class FilesController {
       let addedFile;
       const userId = new dbClient.ObjectID(id);
       
-      if (parentId) {
-        const parentFile = await dbClient.db.collection('users')
+      if (parentId !== '0') {
+        const parentFile = await dbClient.db.collection('files')
         .findOne({ _id: new dbClient.ObjectID(parentId) });
         if (!parentFile) return res.status(400).json({ error: 'Parent not found' });
         if (parentFile.type !== 'folder') {
