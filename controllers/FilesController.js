@@ -1,8 +1,8 @@
 import fs from 'fs';
 import {v4 as uuidv4} from 'uuid';
-import Mongo from '../utils/db';
+import dbClient from '../utils/db';
 import RedisClient from '../utils/redis';
-
+import mon = from ('mongodb');
 
 class FilesController {
     static async postUpload(req, res) {

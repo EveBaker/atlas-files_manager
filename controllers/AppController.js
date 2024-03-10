@@ -12,7 +12,7 @@
  */
 import redisClient from '../utils/redis';
 
-import DBClient from '../utils/db';
+import dbClient from '../utils/db';
 
 const AppController = {
   getStatus: (request, response) => {
