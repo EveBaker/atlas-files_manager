@@ -206,6 +206,57 @@ class FilesController {
     file.isPublic = false;
     return res.json({ ...file });
   }
+
+  static async getShow(req, res) {
+    try {
+      const userId = await redisClient.get(`auth_${req.headers['x-token']}`);
+      if (!userId) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
+      const file = await dbClient.db.collection('files').findOne({
+        _id: new dbClient.ObjectID(req.params.id),
+        userId: new dbClient.ObjectID(userId),
+      });
+      if (!file) {
+        return res.status(404).json({ error: 'Not found' });
+      }
+      return res.json(file);
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: 'Internal Server Error' });
+    }
+  }
+
+  static async getIndex(req, res) {
+    try {
+      const userId = await redisClient.get(`auth_${req.headers['x-token']}`);
+      if (!userId) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
+
+      const parentId = req.query.parentId || '0';
+      const page = parseInt(req.query.page, 10) || 0;
+      const limit = 20;
+
+      const files = await dbClient.db.collection('files').find({
+        userId: new dbClient.ObjectID(userId),
+        parentId: parentId === '0' ? parentId : new dbClient.ObjectID(parentId),
+      }).skip(page * limit).limit(limit)
+        .toArray();
+
+      return res.json(files.map((file) => ({
+        id: file._id,
+        userId: file.userId,
+        name: file.name,
+        type: file.type,
+        isPublic: file.isPublic,
+        parentId: file.parentId,
+      })));
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: 'Internal Server Error' });
+    }
+  }
 }
 
 module.exports = FilesController;
