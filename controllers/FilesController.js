@@ -1,5 +1,6 @@
 import fs from 'fs';
 import { v4 as uuidv4 } from 'uuid';
+import { ObjectId } from 'mongodb';
 import dbClient from '../utils/db';
 import redisClient from '../utils/redis';
 
@@ -20,11 +21,11 @@ class FilesController {
       }
 
       let addedFile;
-      const userId = new dbClient.ObjectID(id);
+      const userId = new dbClient.ObjectId(id);
 
       if (parentId !== '0') {
         const parentFile = await dbClient.db.collection('files')
-          .findOne({ _id: new dbClient.ObjectID(parentId) });
+          .findOne({ _id: new dbClient.ObjectId(parentId) });
         if (!parentFile) return res.status(400).json({ error: 'Parent not found' });
         if (parentFile.type !== 'folder') {
           return res.status(400).json({ error: 'Parent is not a folder' });
@@ -87,7 +88,7 @@ class FilesController {
 
       // Attempt to retrieve the file from the database
       const file = await dbClient.db.collection('files').findOne({
-        _id: new dbClient.ObjectID(id),
+        _id: new dbClient.ObjectId(id),
       });
 
       // Check if the file exists and if the user is authorized to access it
@@ -125,7 +126,7 @@ class FilesController {
       fileList = await dbClient.db
         .collection('files')
         .aggregate([
-          { $match: { parentId: new dbClient.ObjectID(parentId) } },
+          { $match: { parentId: new dbClient.ObjectId(parentId) } },
           { $skip: page * 20 },
           { $limit: 20 },
         ])
@@ -133,7 +134,7 @@ class FilesController {
     } else {
       fileList = await dbClient.files
         .aggregate([
-          { $match: { userId: new dbClient.ObjectID(userId) } },
+          { $match: { userId: new dbClient.ObjectId(userId) } },
           { $skip: page * 20 },
           { $limit: 20 },
         ])
@@ -156,7 +157,7 @@ class FilesController {
 
     const { id } = req.params;
     const file = await dbClient.db.collection('files').findOne({
-      _id: new dbClient.ObjectID(id),
+      _id: new dbClient.ObjectId(id),
     });
 
     if (!file || (!file.isPublic && (!userId || userId !== file.userId))) {
@@ -181,7 +182,7 @@ class FilesController {
 
     const { id } = req.params;
     const file = await dbClient.db.collection('files').findOneAndUpdate({
-      _id: new dbClient.ObjectID(id),
+      _id: new dbClient.ObjectId(id),
     });
 
     if (!file || userId !== file.userId) {
@@ -197,7 +198,7 @@ class FilesController {
     if (!userId) return res.status(401).json({ error: 'Unauthorized' });
     const { id } = req.params;
     const file = await dbClient.db.collection('files').findOneAndUpdate({
-      _id: new dbClient.ObjectID(id),
+      _id: new dbClient.ObjectId(id),
     });
 
     if (!file || userId !== file.userId) {
@@ -214,8 +215,8 @@ class FilesController {
         return res.status(401).json({ error: 'Unauthorized' });
       }
       const file = await dbClient.db.collection('files').findOne({
-        _id: new dbClient.ObjectID(req.params.id),
-        userId: new dbClient.ObjectID(userId),
+        _id: new dbClient.ObjectId(req.params.id),
+        userId: new dbClient.ObjectId(userId),
       });
       if (!file) {
         return res.status(404).json({ error: 'Not found' });
@@ -239,8 +240,8 @@ class FilesController {
       const limit = 20;
 
       const files = await dbClient.db.collection('files').find({
-        userId: new dbClient.ObjectID(userId),
-        parentId: parentId === '0' ? parentId : new dbClient.ObjectID(parentId),
+        userId: new dbClient.ObjectId(userId),
+        parentId: parentId === '0' ? parentId : new dbClient.ObjectId(parentId),
       }).skip(page * limit).limit(limit)
         .toArray();
 
