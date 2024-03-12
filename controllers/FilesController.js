@@ -152,17 +152,26 @@ class FilesController {
   // TASK 7 ROUTES
   static async putPublish(req, res) {
     try {
-      const userId = await redisClient.get(`auth_${req.headers['x-token']}`);
-      if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+      const token = req.headers['x-token'];
+      const userId = await redisClient.get(`auth_${token}`);
+      if (!userId) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
 
       const fileId = req.params.id;
+      if (!ObjectID.isValid(fileId)) {
+        return res.status(400).json({ error: 'Invalid file ID' });
+      }
+
       const updateResult = await dbClient.db.collection('files').findOneAndUpdate(
         { _id: new dbClient.ObjectID(fileId), userId: new dbClient.ObjectID(userId) },
         { $set: { isPublic: true } },
-        { returnOriginal: false }, // returns the updated document
+        { returnOriginal: false },
       );
 
-      if (!updateResult.value) return res.status(404).json({ error: 'Not found' });
+      if (!updateResult.value) {
+        return res.status(404).json({ error: 'Not found' });
+      }
       return res.status(200).json(updateResult.value);
     } catch (error) {
       console.error(error);
@@ -172,18 +181,26 @@ class FilesController {
 
   static async putUnpublish(req, res) {
     try {
-      const userId = await redisClient.get(`auth_${req.headers['x-token']}`);
-      if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+      const token = req.headers['x-token'];
+      const userId = await redisClient.get(`auth_${token}`);
+      if (!userId) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
 
       const fileId = req.params.id;
+      if (!ObjectID.isValid(fileId)) {
+        return res.status(400).json({ error: 'Invalid file ID' });
+      }
+
       const updateResult = await dbClient.db.collection('files').findOneAndUpdate(
         { _id: new dbClient.ObjectID(fileId), userId: new dbClient.ObjectID(userId) },
         { $set: { isPublic: false } },
-        { returnOriginal: false }, // returns the updated document
+        { returnOriginal: false },
       );
 
-      if (!updateResult.value) return res.status(404).json({ error: 'Not found' });
-
+      if (!updateResult.value) {
+        return res.status(404).json({ error: 'Not found' });
+      }
       return res.status(200).json(updateResult.value);
     } catch (error) {
       console.error(error);
