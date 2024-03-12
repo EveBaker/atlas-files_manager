@@ -37,8 +37,8 @@ router.get('/users/me', UsersController.getMe);
 router.post('/files', FilesController.postUpload);
 
 // task 6 routes
-// router.get('/files/:id', FilesController.getShow);
-// router.get('/files', FilesController.getIndex);
+router.get('/files/:id', FilesController.getShow);
+router.get('/files', FilesController.getIndex);
 
 // task 7 routes
 // router.put('/files/:id/publish', FilesController.putPublish);
