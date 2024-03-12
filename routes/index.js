@@ -42,7 +42,7 @@ router.get('/files', FilesController.getIndex);
 
 // task 7 routes
 router.put('/files/:id/publish', FilesController.putPublish);
-router.put('/files/:id/publish', FilesController.putUnpublish);
+router.put('/files/:id/unpublish', FilesController.putUnpublish);
 
 // task 8 routes
 // router.get('/files/:id/data', FilesController.getFile);
