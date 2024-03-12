@@ -150,6 +150,47 @@ class FilesController {
   }
 
   // TASK 7 ROUTES
+  static async putPublish(req, res) {
+    try {
+      const userId = await redisClient.get(`auth_${req.headers['x-token']}`);
+      if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
+      const fileId = req.params.id;
+      const updateResult = await dbClient.db.collection('files').findOneAndUpdate(
+        { _id: new dbClient.ObjectID(fileId), userId: new dbClient.ObjectID(userId) },
+        { $set: { isPublic: true } },
+        { returnOriginal: false }, // returns the updated document
+      );
+
+      if (!updateResult.value) return res.status(404).json({ error: 'Not found' });
+      return res.status(200).json(updateResult.value);
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: 'Internal Server Error' });
+    }
+  }
+
+  static async putUnpublish(req, res) {
+    try {
+      const userId = await redisClient.get(`auth_${req.headers['x-token']}`);
+      if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
+      const fileId = req.params.id;
+      const updateResult = await dbClient.db.collection('files').findOneAndUpdate(
+        { _id: new dbClient.ObjectID(fileId), userId: new dbClient.ObjectID(userId) },
+        { $set: { isPublic: false } },
+        { returnOriginal: false }, // returns the updated document
+      );
+
+      if (!updateResult.value) return res.status(404).json({ error: 'Not found' });
+
+      return res.status(200).json(updateResult.value);
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: 'Internal Server Error' });
+    }
+  }
+
   // TASK 8 ROUTES
 }
 
