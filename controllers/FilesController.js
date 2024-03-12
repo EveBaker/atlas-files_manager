@@ -17,13 +17,24 @@ class FilesController {
       const {
         name,
         type,
-        parentId = '0',
+        parentId = 0,
         isPublic = false,
         data,
       } = req.body;
 
-      if (!name) return res.status(400).json({ error: 'Missing name' });
-      if (!type) return res.status(400).json({ error: 'Missing type' });
+      // type: either folder, file or image
+      const VALID_TYPES = ['folder', 'file', 'image'];
+      const typeCheck = VALID_TYPES.includes(type);
+
+      // if name: as filename is missing
+      if (!name) {
+        return res.status(400).json({ error: 'Missing name' });
+      }
+      // if type is missing or not part of the list of accepted type
+      if (!type || !typeCheck) {
+        return res.status(400).send({ error: 'Missing type' });
+      }
+      // If the data is missing and type != folder
       if (type !== 'folder' && !data) {
         return res.status(400).json({ error: 'Missing data' });
       }
@@ -31,7 +42,7 @@ class FilesController {
       let addedFile;
       const userId = new ObjectID(id);
 
-      if (parentId !== '0') {
+      if (parentId !== 0) {
         const parentFile = await dbClient.db.collection('files')
           .findOne({ _id: new ObjectID(parentId) });
 
@@ -52,13 +63,15 @@ class FilesController {
       } else {
         const FOLDER_PATH = process.env.FOLDER_PATH || '/tmp/files_manager';
         if (!fs.existsSync(FOLDER_PATH)) {
-          fs.promises.mkdirSync(FOLDER_PATH);
+          await fs.promises.mkdir(FOLDER_PATH, { recursive: true });
         }
 
-        const filePath = `${FOLDER_PATH}/${uuidv4()}`;
+        const filename = uuidv4();
+        const filePath = path.join(FOLDER_PATH, filename);
+
         const decode = Buffer.from(data, 'base64').toString();
 
-        await fs.promises.writeFile(filePath, decode);
+        fs.promises.writeFile(filePath, decode);
 
         addedFile = await dbClient.db.collection('files').insertOne({
           userId,
@@ -268,17 +281,6 @@ class FilesController {
       return res.status(500).json({ error: 'Internal Server Error' });
     }
   }
-}
-
-async function saveFileToDisk(base64Data) {
-  const FOLDER_PATH = process.env.FOLDER_PATH || '/tmp/files_manager';
-  await fs.mkdir(FOLDER_PATH, { recursive: true });
-
-  const fileName = uuidv4();
-  const filePath = `${FOLDER_PATH}/${fileName}`;
-  await fs.writeFile(filePath, Buffer.from(base64Data, 'base64'));
-
-  return filePath;
 }
 
 module.exports = FilesController;
