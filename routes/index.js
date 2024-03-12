@@ -21,19 +21,30 @@ import FilesController from '../controllers/FilesController';
 const express = require('express');
 
 const router = express.Router();
-
+// task 2 routes
 router.get('/status', AppController.getStatus);
 router.get('/stats', AppController.getStats);
 
-router.get('/connect', AuthController.getConnect);
+// task 3 routes
+router.post('/users', UsersController.postNew);
 
+// task 4 routes
+router.get('/connect', AuthController.getConnect);
 router.get('/disconnect', AuthController.getDisconnect);
 router.get('/users/me', UsersController.getMe);
 
-router.post('/users', UsersController.postNew);
+// task 5 routes
 router.post('/files', FilesController.postUpload);
 
-router.get('/files/:id', FilesController.getShow);
-router.get('/files', FilesController.getIndex);
+// task 6 routes
+// router.get('/files/:id', FilesController.getShow);
+// router.get('/files', FilesController.getIndex);
+
+// task 7 routes
+// router.put('/files/:id/publish', FilesController.putPublish);
+// router.put('/files/:id/publish', FilesController.putUnpublish);
+
+// task 8 routes
+// router.get('/files/:id/data', FilesController.getFile);
 
 module.exports = router;
