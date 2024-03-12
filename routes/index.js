@@ -45,6 +45,6 @@ router.put('/files/:id/publish', FilesController.putPublish);
 router.put('/files/:id/unpublish', FilesController.putUnpublish);
 
 // task 8 routes
-router.get('/files/:id/data', FilesController.getFile);
+// router.get('/files/:id/data', FilesController.getFile);
 
 module.exports = router;
