@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { ObjectID } from 'mongodb';
 import dbClient from '../utils/db';
 import redisClient from '../utils/redis';
+import mime from 'mime-types';
 
 class FilesController {
   // TASK 5 ROUTE
